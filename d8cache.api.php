@@ -30,7 +30,7 @@ function hook_pre_emit_cache_tags_alter(&$tags) {
  */
 function hook_emit_cache_max_age($max_age) {
   $page_cache_maximum_age = variable_get('page_cache_maximum_age', 0);
-  if ($max_age == CACHE_MAX_AGE_PERMANENT || $max_age > $page_cache_maximum_age);
+  if ($max_age == CACHE_MAX_AGE_PERMANENT || $max_age > $page_cache_maximum_age) {
     $max_age = $page_cache_maximum_age;
   }
   if (!isset($_COOKIE[session_name()])) {
