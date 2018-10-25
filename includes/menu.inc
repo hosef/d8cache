@@ -23,14 +23,14 @@ function d8cache_preprocess_menu_link(&$variables) {
  */
 function d8cache_preprocess_links(&$variables) {
   $tag_map = array();
-
-  foreach ($variables['links'] as $link) {
-    if (isset($link['#menu_name'])) {
-      $tag_map['menu:' . strtr($link['#menu_name'], '-', '_')] = TRUE;
+  if (isset($variables['links'])) {
+    foreach ($variables['links'] as $link) {
+      if (isset($link['#menu_name'])) {
+        $tag_map['menu:' . strtr($link['#menu_name'], '-', '_')] = TRUE;
+      }
     }
+    drupal_add_cache_tags(array_keys($tag_map));
   }
-
-  drupal_add_cache_tags(array_keys($tag_map));
 }
 
 /**
