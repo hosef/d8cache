@@ -52,6 +52,16 @@ function d8cache_emit_cache_tags($tags) {
 }
 
 /**
+ * Implements hook_emit_cache_max_age().
+ */
+function d8cache_emit_cache_max_age($max_age) {
+  $page_cache_max_age = &drupal_static(__FUNCTION__, array());
+
+  // Store the emitted cache max_age for further use.
+  $page_cache_max_age = $max_age;
+}
+
+/**
  * Implements hook_invalidate_cache_tags().
  */
 function d8cache_invalidate_cache_tags($tags) {
