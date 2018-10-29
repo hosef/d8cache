@@ -74,7 +74,7 @@ function d8cache_entitycache_load($entities, $entity_type) {
 /**
  * Temporarily disable adding of cache tags during entity loading.
  */
-function d8cache_disable_cache_tags_for_entity_load($new_status = NULL) {
+function d8cache_disable_cache_tags_for_entity_load($new_state = NULL) {
   $state = &drupal_static('d8cache_entity_load', FALSE);
   $old_state = $state;
 
