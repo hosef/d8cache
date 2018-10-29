@@ -123,6 +123,11 @@ class D8Cache implements TaggableDrupalCacheInterface {
         $expire = REQUEST_TIME + $this->configuration['ttl'];
       }
     }
+    // Allow to set global tags per bin.
+    if (isset($this->configuration['tags'])) {
+      $tags = drupal_merge_cache_tags($tags, $this->configuration['tags']);
+    }
+
 
     // Special case cache_page.
     if ($this->bin == 'cache_page') {
@@ -259,8 +264,8 @@ class D8Cache implements TaggableDrupalCacheInterface {
   protected function checksumValid($checksum, array $tags) {
     if ($this->bin == 'cache_page' && !function_exists('d8cache_cache_tags_is_valid')) {
       // In case that we use the internal page cache we need to load the
-      // module early.
-      drupal_load('module', 'd8cache');
+      // module file early.
+      require_once __DIR__ . '/d8cache.module';
     }
 
     return d8cache_cache_tags_is_valid($checksum, $tags);
