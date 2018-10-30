@@ -198,7 +198,7 @@ class D8Cache implements TaggableDrupalCacheInterface {
   /**
    * {@inheritdoc}
    */
-  function isEmpty() {
+  public function isEmpty() {
     // It is impossible to determine this as we cannot list all items in a
     // consistent way as it depends on the backend used.
     return FALSE;
