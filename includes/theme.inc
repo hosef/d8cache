@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Theme functions and hooks for the D8 caching system backport.

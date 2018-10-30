@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * TaggableDrupalCacheInterface functions for the D8 caching system backport.

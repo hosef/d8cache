@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Attachment Collector functions for the D8 caching system backport.
@@ -182,8 +183,9 @@ class DrupalAttachmentsCollector {
 }
 }
 
-// -----------------------------------------------------------------------
-// Helper functions
+/* -----------------------------------------------------------------------
+ * Helper functions
+ */
 
 /**
  * Overrides drupal_process_attached().

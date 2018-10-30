@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Block functions and hooks for the D8 caching system backport.
@@ -58,15 +59,21 @@ function d8cache_form_block_admin_display_form_alter(&$form, $form_state) {
   $form['#submit'][] = '_d8cache_invalidate_block_view_submit';
 }
 
-// -----------------------------------------------------------------------
-// Contrib hooks
+/* -----------------------------------------------------------------------
+ * Contrib hooks
+ */
 
-// -----------------------------------------------------------------------
-// Public API
+/* -----------------------------------------------------------------------
+ * Public API
+ */
 
-// -----------------------------------------------------------------------
-// Helper functions
+/* -----------------------------------------------------------------------
+ * Helper functions
+ */
 
+/**
+ * Get cache tags for block.
+ */
 function _d8cache_block_get_cache_tags($block) {
   $tags = array();
   $tags[] = 'block:' . $block->module . '.' . str_replace('-', '_', drupal_html_class($block->delta));

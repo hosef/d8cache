@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Attachments collecting cache backend.
+ */
+
 require_once __DIR__ . '/d8cache.cache.inc';
 require_once __DIR__ . '/includes/core-attachments-collector.inc';
 

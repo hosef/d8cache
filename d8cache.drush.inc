@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Drush hooks for d8cache.
+ */
+
+/**
  * Implements hook_drush_command().
  */
 function d8cache_drush_command() {
@@ -9,12 +14,12 @@ function d8cache_drush_command() {
     'description' => 'Invalidates the specified cache tags.',
     'aliases' => array('ict'),
     'arguments' => array(
-       'tags' => 'A list of tags seperated by ",".',
-     ),
-     'examples' => array(
-       'drush ict rendered' => 'Invalidate the "rendered" cache tag.',
-       'drush ict node:1,node:2' => 'Invalidate the "node:1" and "node:2" cache tags.',
-     ),
+      'tags' => 'A list of tags seperated by ",".',
+    ),
+    'examples' => array(
+      'drush ict rendered' => 'Invalidate the "rendered" cache tag.',
+      'drush ict node:1,node:2' => 'Invalidate the "node:1" and "node:2" cache tags.',
+    ),
   );
 
   return $commands;
@@ -22,6 +27,7 @@ function d8cache_drush_command() {
 
 /**
  * Drush command logic.
+ *
  * drush_[COMMAND_NAME]().
  */
 function drush_d8cache_invalidate_cache_tags($tags = '') {
@@ -35,4 +41,3 @@ function drush_d8cache_invalidate_cache_tags($tags = '') {
     drush_log($error, 'error');
   }
 }
-

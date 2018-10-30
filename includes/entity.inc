@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Entity functions and hooks for the D8 caching system backport.
@@ -58,8 +59,9 @@ function d8cache_entity_delete($entity, $entity_type) {
   _d8cache_entity_invalidate_cache_tags($entity_type, $entity);
 }
 
-// -----------------------------------------------------------------------
-// Contrib hooks
+/* -----------------------------------------------------------------------
+ * Contrib hooks
+ */
 
 /**
  * Implements hook_entitycache_load().
@@ -68,8 +70,9 @@ function d8cache_entitycache_load($entities, $entity_type) {
   d8cache_entity_load($entities, $entity_type);
 }
 
-// -----------------------------------------------------------------------
-// Public API
+/* -----------------------------------------------------------------------
+ * Public API
+ */
 
 /**
  * Temporarily disable adding of cache tags during entity loading.
@@ -85,9 +88,13 @@ function d8cache_disable_cache_tags_for_entity_load($new_state = NULL) {
   return $old_state;
 }
 
-// -----------------------------------------------------------------------
-// Helper functions
+/* -----------------------------------------------------------------------
+ * Helper functions
+ */
 
+/**
+ * Invalidate entity specific cache tags.
+ */
 function _d8cache_entity_invalidate_cache_tags($entity_type, $entity) {
   $tags = _d8cache_entity_get_list_cache_tags($entity_type);
   $tags = array_merge($tags, _d8cache_entity_get_cache_tags($entity_type, $entity));
@@ -95,12 +102,18 @@ function _d8cache_entity_invalidate_cache_tags($entity_type, $entity) {
   drupal_invalidate_cache_tags($tags);
 }
 
+/**
+ * Get cache tags for an entity type.
+ */
 function _d8cache_entity_get_list_cache_tags($entity_type) {
   return array(
     $entity_type . '_list',
   );
 }
 
+/**
+ * Get cache tags for an entity.
+ */
 function _d8cache_entity_get_cache_tags($entity_type, $entity) {
   list($entity_id,,) = entity_extract_ids($entity_type, $entity);
   return array(

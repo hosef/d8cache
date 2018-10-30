@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * D8Cache backend.
+ */
+
 require_once DRUPAL_ROOT . '/includes/cache.inc';
 require_once __DIR__ . '/includes/core.inc';
 require_once __DIR__ . '/includes/core-taggable-dci.inc';
@@ -12,6 +17,8 @@ require_once __DIR__ . '/includes/core-taggable-dci.inc';
 class D8Cache implements TaggableDrupalCacheInterface {
 
   /**
+   * The cache bin.
+   *
    * @var string
    */
   protected $bin;
@@ -128,7 +135,6 @@ class D8Cache implements TaggableDrupalCacheInterface {
       $tags = drupal_merge_cache_tags($tags, $this->configuration['tags']);
     }
 
-
     // Special case cache_page.
     if ($this->bin == 'cache_page') {
       $page_cache_tags = &drupal_static('d8cache_emit_cache_tags', array());
@@ -205,7 +211,7 @@ class D8Cache implements TaggableDrupalCacheInterface {
    *   A unix timestamp when this item will expire or one of the CACHE_*
    *   constants.
    * @param int $max_age
-   *   A max-age ttl value like an integer or CACHE_MAX_AGE_PERMANENT
+   *   A max-age ttl value like an integer or CACHE_MAX_AGE_PERMANENT.
    *
    * @return int
    *   A unix timestamp when this item will expire or one of the CACHE_*
@@ -270,4 +276,5 @@ class D8Cache implements TaggableDrupalCacheInterface {
 
     return d8cache_cache_tags_is_valid($checksum, $tags);
   }
+
 }

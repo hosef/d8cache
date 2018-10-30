@@ -1,6 +1,8 @@
 <?php
+
 /**
- * @file D8Cache schema for cache_tags.
+ * @file
+ * D8Cache schema for cache_tags.
  */
 
 /**

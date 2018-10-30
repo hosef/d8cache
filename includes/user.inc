@@ -1,11 +1,13 @@
 <?php
+
 /**
  * @file
  * User functions and hooks for the D8 caching system backport.
  */
 
-// -----------------------------------------------------------------------
-// Core hooks
+/* -----------------------------------------------------------------------
+ * Core hooks
+ */
 
 /**
  * Implements hook_user_insert().
@@ -20,7 +22,6 @@ function d8cache_user_insert(&$edit, $account, $category) {
 function d8cache_user_update(&$edit, $account, $category) {
   drupal_invalidate_cache_tags(array('search_index:user'));
 }
-
 
 /**
  * Implements hook_user_cancel().
@@ -40,11 +41,14 @@ function d8cache_user_delete($account) {
   drupal_invalidate_cache_tags(array('search_index:user'));
 }
 
-// -----------------------------------------------------------------------
-// Contrib hooks
+/* -----------------------------------------------------------------------
+ * Contrib hooks
+ */
 
-// -----------------------------------------------------------------------
-// Public API
+/* -----------------------------------------------------------------------
+ * Public API
+ */
 
-// -----------------------------------------------------------------------
-// Helper functions
+/* -----------------------------------------------------------------------
+ * Helper functions
+ */

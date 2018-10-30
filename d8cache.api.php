@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * API documentation for D8Cache.
+ */
+
+/**
  * Allows to react to emitting a cache tags header.
  *
  * @param array $tags
