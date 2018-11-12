@@ -166,12 +166,12 @@ if (!class_exists('DrupalAttachmentsCollector', FALSE)) {
     }
 
     /**
-     * Implements __serialize().
+     * Implements __sleep().
      *
      * This disallows serializing the attachments collector as it relies on
      * state.
      */
-    public function __serialize() {
+    public function __sleep() {
       throw new Exception('An attachments collector cannot be serialized.');
     }
 
