@@ -14,7 +14,7 @@ function d8cache_entity_view($entity, $entity_type, $view_mode, $langcode) {
 
   if ($entity_type == 'node' && $view_mode != 'full') {
     // @todo Find a better way to add list cache tags.
-    $tags = array_merge($tags, _d8cache_entity_get_list_cache_tags($entity_type));
+    $tags = array_merge($tags, _d8cache_entity_get_list_cache_tags($entity_type, $entity));
   }
 
   $entity->content['#attached']['drupal_add_cache_tags'][][0] = $tags;
@@ -96,7 +96,7 @@ function d8cache_disable_cache_tags_for_entity_load($new_state = NULL) {
  * Invalidate entity specific cache tags.
  */
 function _d8cache_entity_invalidate_cache_tags($entity_type, $entity) {
-  $tags = _d8cache_entity_get_list_cache_tags($entity_type);
+  $tags = _d8cache_entity_get_list_cache_tags($entity_type, $entity);
   $tags = array_merge($tags, _d8cache_entity_get_cache_tags($entity_type, $entity));
 
   drupal_invalidate_cache_tags($tags);
@@ -105,10 +105,13 @@ function _d8cache_entity_invalidate_cache_tags($entity_type, $entity) {
 /**
  * Get cache tags for an entity type.
  */
-function _d8cache_entity_get_list_cache_tags($entity_type) {
-  return array(
-    $entity_type . '_list',
-  );
+function _d8cache_entity_get_list_cache_tags($entity_type, $entity = NULL) {
+  $return = array($entity_type . '_list');
+  if (!empty($entity)) {
+    list(,, $entity_bundle) = entity_extract_ids($entity_type, $entity);
+    $return[] = $entity_type . '_' . $entity_bundle . '_list';
+  }
+  return $return;
 }
 
 /**
