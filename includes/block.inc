@@ -27,7 +27,10 @@ function d8cache_block_view_alter(&$data, $block) {
   // collector group.
   if (empty($cid)) {
     $cache = d8cache_cache_get_object('cache_block');
-    $cache->resetCurrentAttachmentsCollector();
+    if (is_object($cache) && $cache instanceof D8CacheAttachmentsCollector) {
+      /** @var D8CacheAttachmentsCollector $cache */
+      $cache->resetCurrentAttachmentsCollector();
+    }
   }
 }
 
