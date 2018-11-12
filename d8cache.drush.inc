@@ -28,7 +28,7 @@ function d8cache_drush_command() {
 /**
  * Drush command logic.
  *
- * drush_[COMMAND_NAME]().
+ * Implements drush_[COMMAND_NAME]().
  */
 function drush_d8cache_invalidate_cache_tags($tags = '') {
   $tags = explode(',', $tags);

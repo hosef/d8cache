@@ -37,6 +37,7 @@ class D8CacheDrupalAttachmentsCollector extends DrupalAttachmentsCollector {
 }
 
 /**
+ * Special cache backend that tracks attachments.
  *
  * @ingroup cache
  */
@@ -120,7 +121,7 @@ class D8CacheAttachmentsCollector extends D8Cache {
   }
 
   /**
-   * Reset the currently active attachemnts collector - if any.
+   * Reset the currently active attachments collector - if any.
    */
   public function resetCurrentAttachmentsCollector() {
     if ($this->currentAttachmentsCollector) {
