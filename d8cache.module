@@ -83,7 +83,15 @@ function d8cache_invalidate_cache_tags($tags) {
       ->fields(array('invalidations' => 1))
       ->expression('invalidations', 'invalidations + 1')
       ->execute();
+    _d8cache_cache_tags_invalidate_cache($tag);
   }
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function d8cache_flush_caches() {
+  return _d8cache_cache_tags_cache_bins();
 }
 
 /* -----------------------------------------------------------------------
@@ -169,13 +177,17 @@ function _d8cache_cache_tags_calculate_checksum(array $tags) {
   $checksum = 0;
 
   $query_tags = array_diff($tags, array_keys($tag_cache));
-  if ($query_tags) {
-    if ($db_tags = db_query('SELECT tag, invalidations FROM {d8cache_cache_tags} WHERE tag IN (:tags)', array(':tags' => $query_tags))->fetchAllKeyed()) {
-      $tag_cache += $db_tags;
-    }
 
-    // Fill static cache with empty objects for tags not found in the database.
-    $tag_cache += array_fill_keys(array_diff($query_tags, array_keys($db_tags)), 0);
+  // Try to load from cache first.
+  if ($query_tags) {
+    $tag_cache += _d8cache_cache_tags_load_from_cache($query_tags);
+  }
+
+  // Are there any remaining tags to query?
+  if ($query_tags) {
+    $result = _d8cache_cache_tags_load_from_db($query_tags);
+    _d8cache_cache_tags_update_cache($result);
+    $tag_cache += $result;
   }
 
   foreach ($tags as $tag) {
@@ -183,4 +195,96 @@ function _d8cache_cache_tags_calculate_checksum(array $tags) {
   }
 
   return $checksum;
+}
+
+/**
+ * Loads cache tag invalidations from the database.
+ *
+ * @param array $query_tags
+ *   The tags to query from the database.
+ *
+ * @return array
+ *   An array keyed by tag with invalidations as value. Using 0 if no
+ *   invalidation occured, yet.
+ */
+function _d8cache_cache_tags_load_from_db($query_tags) {
+  $result = array();
+
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
+  if ($db_tags = db_query('SELECT tag, invalidations FROM {d8cache_cache_tags} WHERE tag IN (:tags)', array(':tags' => $query_tags))->fetchAllKeyed()) {
+    $result += $db_tags;
+  }
+
+  // Fill static cache with empty objects for tags not found in the database.
+  $result += array_fill_keys(array_diff($query_tags, array_keys($db_tags)), 0);
+
+  return $result;
+}
+
+/* -----------------------------------------------------------------------
+ * Cache helper functions
+ */
+
+function _d8cache_cache_tags_cache_bins() {
+  if (!variable_get('d8cache_use_cache_tags_cache', FALSE)) {
+    return array();
+  }
+
+  return ['cache_d8cache_cache_tags'];
+}
+
+/**
+ * Invalidate a tag from the cache tags cache.
+ *
+ * @param string $tag
+ *   The tag to invalidate.
+ */
+function _d8cache_cache_tags_invalidate_cache($tag) {
+  if (!variable_get('d8cache_use_cache_tags_cache', FALSE)) {
+    return;
+  }
+
+  cache_clear_all($tag, 'cache_d8cache_cache_tags');
+}
+
+/**
+ * Update the cache with data returned from the database.
+ *
+ * @param array $result
+ *   The array of (tag, invalidations) to sync to the database.
+ */
+function _d8cache_cache_tags_update_cache($result) {
+  if (!variable_get('d8cache_use_cache_tags_cache', FALSE)) {
+    return;
+  }
+
+  foreach ($result as $tag => $invalidations) {
+    cache_set($tag, $invalidations, 'cache_d8cache_cache_tags');
+  }
+}
+
+/**
+ * Loads cache tag invalidations from the cache.
+ *
+ * @param array &$query_tags
+ *   The tags to query in the cache. Will be updated by removing tags
+ *   sucessfully returned from cache.
+ *
+ * @return array
+ *   An array keyed by tag with invalidations as value.
+ */
+function _d8cache_cache_tags_load_from_cache(&$query_tags) {
+  if (!variable_get('d8cache_use_cache_tags_cache', FALSE)) {
+    return array();
+  }
+
+  $result = array();
+
+  // Load from cache.
+  $cached = cache_get_multiple($query_tags, 'cache_d8cache_cache_tags');
+  foreach ($cached as $tag => $item) {
+    $result[$tag] = $item->data;
+  }
+
+  return $result;
 }
