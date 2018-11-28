@@ -93,6 +93,9 @@ Once block cache and render cache in core are fixed, then the
 D8CacheAttachmentsCollector will mostly be useful for views and panels to give
 them the ability to collect assets as well.
 
+Note: As the early page cache is served before all modules are loaded, you must
+not use D8CacheAttachmentsCollector for the 'cache_page' bin!
+
 Frequently asked questions
 --------------------------
 
@@ -110,12 +113,12 @@ to remove the node_list cache tag:
    */
   function mymodule_pre_invalidate_cache_tags_alter(&$tags) {
     $index_tags = array_flip($tags);
-  
+
     if (isset($index_tags['node_list'])) {
       unset($tags[$index_tags['node_list']]);
     }
   }
-  
+
 The best way to expire your pages for node listings is to manually clear your cache tags.
 
 - How can I specify a class to use as backend for D8Cache if my bin uses a
@@ -152,7 +155,7 @@ You can implement hook_emit_cache_tags() and use drupal_add_http_header, e.g.:
   function mymodule_emit_cache_tags($tags) {
     drupal_add_http_header('Surrogate-Key', implode(' ', $tags));
   }
-  
+
 - How can I react to cache tag invalidations?
 
 You can implement hook_invalidate_cache_tags() like this:
@@ -163,7 +166,7 @@ You can implement hook_invalidate_cache_tags() like this:
   function mymodule_invalidate_cache_tags($tags) {
     mycustom_varnish_clear_cache_tags($tags);
   }
-  
+
 - How can I add a custom cache tag?
 
 In the code that needs a custom cache tag use:
