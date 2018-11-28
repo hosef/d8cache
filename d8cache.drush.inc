@@ -31,8 +31,9 @@ function d8cache_drush_command() {
  * Implements drush_[COMMAND_NAME]().
  */
 function drush_d8cache_invalidate_cache_tags($tags = '') {
-  $tags = explode(',', $tags);
-  if (!empty($tags) && !empty(trim($tags[0]))) {
+  $tags = array_map('trim', explode(',', $tags));
+  $tags = array_filter($tags);
+  if (!empty($tags)) {
     drupal_invalidate_cache_tags($tags);
     drush_log(dt('Succesfully invalidated the following cache tags: !tags', array('!tags' => implode(',', $tags))), 'success');
   }
