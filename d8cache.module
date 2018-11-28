@@ -64,9 +64,12 @@ function d8cache_emit_cache_max_age($max_age) {
 }
 
 /**
- * Implements hook_invalidate_cache_tags().
+ * Backwards compatible version of d8cache_invalidate_cache_tags().
+ * This will automatically be used when the core patch to implement end of
+ * transaction callbacks is missing.
+ * @param $tags
  */
-function d8cache_invalidate_cache_tags($tags) {
+function d8cache_OLD_invalidate_cache_tags($tags) {
   $tag_cache = &drupal_static('d8cache_tag_cache', array());
   $invalidated_tags = &drupal_static('d8cache_invalidated_tags', array());
 
@@ -92,6 +95,107 @@ function d8cache_invalidate_cache_tags($tags) {
  */
 function d8cache_flush_caches() {
   return _d8cache_cache_tags_cache_bins();
+}
+
+/**
+ * Check whether the database connection supports root transaction end callbacks.
+ * @param DatabaseConnection $connection
+ *
+ * @return bool
+ */
+function _d8cache_has_transaction_callbacks($connection) {
+  return method_exists($connection, 'addRootTransactionEndCallback');
+}
+
+/**
+ * Implements hook_invalidate_cache_tags().
+ */
+function d8cache_invalidate_cache_tags($tags) {
+  // Not using drupal_static because the detection is based on the running
+  // code, and that is not going to change during execution.
+  static $use_transaction_callback;
+  $deferred_tags = &drupal_static('d8cache_deferred_tags', array());
+
+  $connection = Database::getConnection();
+  if (!isset($use_transaction_callback)) {
+    $use_transaction_callback = _d8cache_has_transaction_callbacks($connection);
+  }
+  if (!$use_transaction_callback) {
+    // Core support missing, use the old (deadlock-prone) invalidation code.
+    return d8cache_OLD_invalidate_cache_tags($tags);
+  }
+  if ($connection->inTransaction()) {
+    // We are inside a transaction, we must defer until the end of the transaction.
+    foreach ($tags as $tag) {
+      if (empty($deferred_tags)) {
+        $connection->addRootTransactionEndCallback('d8cache_root_transaction_end');
+      }
+      $deferred_tags[$tag] = TRUE;
+    }
+  }
+  else {
+    // Not in a transction, directly invalidate instead.
+    d8cache_do_invalidate_cache_tags($tags);
+  }
+}
+
+/**
+ * Perform cache tag invalidations. Must do outside of a transaction.
+ *
+ * @throws \Exception
+ */
+function d8cache_do_invalidate_cache_tags($tags) {
+  $tag_cache = &drupal_static('d8cache_tag_cache', array());
+  $invalidated_tags = &drupal_static('d8cache_invalidated_tags', array());
+
+  $connection = Database::getConnection();
+  if($connection->inTransaction()) {
+    throw new Exception('Must be outside of a transaction!');
+  }
+  // Ensure tags are cleared in a deterministic order by sorting them first.
+  // This prevents an edge case between multiple transactions that can
+  // cause a deadlock.
+  $tags = array_unique($tags);
+  sort($tags);
+
+  $transaction = db_transaction();
+  foreach ($tags as $tag) {
+    // Only invalidate tags once per request unless they are written again.
+    if (isset($invalidated_tags[$tag])) {
+      continue;
+    }
+
+    $invalidated_tags[$tag] = TRUE;
+    unset($tag_cache[$tag]);
+    try {
+      db_merge('d8cache_cache_tags')
+        ->key(['tag' => $tag])
+        ->fields(['invalidations' => 1])
+        ->expression('invalidations', 'invalidations + 1')
+        ->execute();
+    }
+    catch (Exception $e) {
+      $transaction->rollback();
+      throw $e;
+    }
+  }
+  // COMMIT
+}
+
+/**
+ * Callback to invalidate cache tags at the end of a transaction.
+ */
+function d8cache_root_transaction_end($committed) {
+  $deferred_tags = &drupal_static('d8cache_deferred_tags', array());
+  if ($committed) {
+    d8cache_do_invalidate_cache_tags($deferred_tags);
+  }
+  else {
+    // Do nothing.
+    // @todo Check transaction isolation level and invalidate anyway if the
+    // database is operating in a non-isolated mode?
+  }
+  $deferred_tags = array();
 }
 
 /* -----------------------------------------------------------------------
