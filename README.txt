@@ -24,6 +24,24 @@ $conf['cache_class_cache_page'] = 'D8Cache';
 In this example both cache_views_data and cache_block are taken over by a
 D8CacheAttachmentsCollector class.
 
+Performance and Reliability notes
+---------------------------------
+
+- Possible deadlock when saving content
+
+If you are storing cache tags in the database, be aware there is a D8 core issue
+(#2966607) open regarding a possible deadlock between content saving and tag
+invalidation. If you are encountering deadlocks when saving content, you may
+want to try using the Drupal 7 backport of this patch from
+https://www.drupal.org/project/drupal/issues/3004437 -- it adds the
+ability for modules to run code after a database transaction has been committed.
+
+A future Drupal 7 release will include this functionality, once the Drupal 8
+version has been finalized.
+
+D8Cache will automatically detect when this support is available, and if so,
+will defer tag invalidation until after the current transaction has completed.
+
 Drupal 8 API comparison
 -----------------------
 
