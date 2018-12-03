@@ -251,6 +251,10 @@ class D8Cache implements TaggableDrupalCacheInterface {
    *   Cache tag invalidations checksum.
    */
   protected function getCurrentChecksum(array $tags) {
+    if (!$this->ensureInstalled()) {
+      // When the module has not been installed yet, don't calculate a checksum.
+      return 0;
+    }
     return d8cache_cache_tags_get_current_checksum($tags);
   }
 
@@ -270,13 +274,45 @@ class D8Cache implements TaggableDrupalCacheInterface {
    *   the cache item was stored, TRUE otherwise.
    */
   protected function checksumValid($checksum, array $tags) {
-    if ($this->bin == 'cache_page' && !function_exists('d8cache_cache_tags_is_valid')) {
-      // In case that we use the internal page cache we need to load the
-      // module file early.
-      require_once __DIR__ . '/d8cache.module';
+    if (!$this->ensureInstalled()) {
+      // When the module has not been installed yet, assume all checksums are
+      // valid.
+      return TRUE;
     }
 
     return d8cache_cache_tags_is_valid($checksum, $tags);
   }
 
+  /**
+   * Ensure D8Cache is installed properly.
+   *
+   * This will preload d8cache.module during page cache serving, and ensure it
+   * is properly installed in other circumstances.
+   *
+   * @return bool FALSE if it appears d8cache is incorrectly installed, otherwise TRUE.
+   */
+  public function ensureInstalled() {
+    static $installStateKnown = FALSE;
+    static $isInstalled = TRUE;
+
+    if ($this->bin == 'cache_page' && drupal_get_bootstrap_phase() < DRUPAL_BOOTSTRAP_FULL) {
+      // Ensure the module file is loaded, in case we are serving a cached page.
+      require_once __DIR__ . '/d8cache.module';
+      // When we haven't fully bootstrapped yet, we can't actually verify that
+      // d8cache has been installed properly. Just assume things are OK.
+      return TRUE;
+    }
+
+    if ($installStateKnown) {
+      return $isInstalled;
+    }
+
+    if (!module_exists('d8cache')) {
+      watchdog('d8cache', 'D8Cache Backend is in use, but the d8cache module has not been enabled! Please enable it to ensure cache tags work properly.', array(), WATCHDOG_ALERT, 'admin/modules');
+      $isInstalled = FALSE;
+    }
+    $installStateKnown = TRUE;
+
+    return $isInstalled;
+  }
 }
