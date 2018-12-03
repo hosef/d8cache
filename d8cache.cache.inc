@@ -157,6 +157,8 @@ class D8Cache implements TaggableDrupalCacheInterface {
 
       if (!empty($cacheable_metadata['tags'])) {
         $tags = drupal_merge_cache_tags($tags, $cacheable_metadata['tags']);
+        // Collapse the attached tags into a single attachment before saving.
+        $data['#attached']['drupal_add_cache_tags'] = array(array(0 => $cacheable_metadata['tags']));
       }
 
       if ($cacheable_metadata['max-age'] != CACHE_MAX_AGE_PERMANENT) {
