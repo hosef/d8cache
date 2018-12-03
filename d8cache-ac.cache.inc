@@ -58,11 +58,44 @@ class D8CacheAttachmentsCollector extends D8Cache {
   protected $currentAttachmentsCollector;
 
   /**
+   * Whether this D8CacheAttachmentsCollector is in a valid state or not.
+   * If not valid, behavior falls back to D8Cache behavior.
+   *
+   * The most common cause of an invalid state is attempting to use this
+   * class to handle early page cache.
+   *
+   * @var boolean
+   */
+  protected $isValid;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct($bin) {
+    $this->isValid = TRUE;
+    if (!function_exists('drupal_process_attached')) {
+      // Something is trying to use us during early bootstrap.
+      // Fall back to baseline D8Cache behavior for safety.
+      $this->isValid = FALSE;
+
+      // Additionally, prevent the request from saving to cache, and warn
+      // loudly that we are in an unsupported configuration.
+      $t = get_t();
+      drupal_set_message($t('D8CacheAttachmentsCollector is not designed for early page cache! Please switch cache_page to D8Cache in settings.php!'), 'error');
+    }
+    parent::__construct($bin);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getMultiple(&$cids, $allow_invalid = FALSE) {
     // The parent will properly populate $cids, so we can rely on it.
     $cache = parent::getMultiple($cids, $allow_invalid);
+
+    if (!$this->isValid) {
+      return $cache;
+    }
 
     // Unpack the cached data and process attachments.
     foreach ($cache as $cid => $item) {
@@ -94,6 +127,12 @@ class D8CacheAttachmentsCollector extends D8Cache {
    * {@inheritdoc}
    */
   public function set($cid, $data, $expire = Cache::PERMANENT, $tags = array()) {
+    // Fall back to regular D8Cache if we are not in a valid state.
+    if (!$this->isValid) {
+      parent::set($cid, $data, $expire, $tags);
+      return;
+    }
+
     $attachments = array();
 
     if (isset($this->attachmentsCollectors[$cid])) {
