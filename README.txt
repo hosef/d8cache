@@ -278,8 +278,40 @@ First of all you need to depend on 'd8cache' and then you should use:
 While there is no function to set tags, using the cache object directly in this
 way is the best way to achieve that.
 
-- I want to use a different backend to store cache tags rather than the database?
+- How I store cache tags in a different backend than the database?
 
-The best way is to extend the D8Cache and D8CacheAttachmentsCollector classes
-and use a trait to override the checksumValid() and getCurrentChecksum()
+Add this to your settings.php:
+$conf['d8cache_use_cache_tags_cache'] = TRUE;
+
+This will make D8Cache look in the 'cache_d8cache_cache_tags' bin for the cache
+tags, and only check the database for any tags that it could not find in this
+secondary cache.
+
+Alternatively, you can extend the D8Cache and D8CacheAttachmentsCollector
+classes and use a trait to override the checksumValid() and getCurrentChecksum()
 functions. Your module should also implement hook_cache_tags_invalidate().
+
+- How do I serve the page cache without boostrapping the database?
+
+Add to settings.php:
+$conf['d8cache_use_cache_tags_cache'] = TRUE;
+// D8Cache will automatically bootstrap the database if needed.
+$conf['page_cache_without_database'] = TRUE;
+// Unless your boot modules were specifically designed to work without the
+// database, you must disable page cache hooks. (hook_boot/hook_exit)
+$conf['page_cache_invoke_hooks'] = FALSE;
+// Use D8Cache for cache_page to handle tag invalidation properly.
+$conf['cache_class_cache_page'] = 'D8Cache';
+// cache_bootstrap is needed during Drupal startup, and must use a cache
+// backend directly.
+$conf['cache_class_cache_bootstrap'] = 'MemCacheDrupal';
+// cache_d8cache_cache_tags must also use a cache backend directly.
+$conf['cache_class_cache_d8cache_cache_tags'] = 'MemCacheDrupal';
+// This is the backing store for cache_page. Invalidation will be handled
+// by D8Cache as configured above.
+$conf['d8cache_cache_class_cache_page'] = 'MemCacheDrupal';
+
+The database will still be bootstrapped if any of the cache tags are missing
+from cache_d8cache_cache_tags. This is necessary to ensure that invalidations
+will be honored properly even when some of the cache tags have been expired from
+the cache tags cache.
