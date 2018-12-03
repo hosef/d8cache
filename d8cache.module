@@ -314,7 +314,9 @@ function _d8cache_cache_tags_calculate_checksum(array $tags) {
 function _d8cache_cache_tags_load_from_db($query_tags) {
   $result = array();
 
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
+  // Ensure database is loaded, since we can get called to load missing tags
+  // during DRUPAL_BOOTSTRAP_PAGE_CACHE. This is a recursive call.
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE, FALSE);
   if ($db_tags = db_query('SELECT tag, invalidations FROM {d8cache_cache_tags} WHERE tag IN (:tags)', array(':tags' => $query_tags))->fetchAllKeyed()) {
     $result += $db_tags;
   }
