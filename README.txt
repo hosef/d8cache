@@ -111,7 +111,7 @@ Once block cache and render cache in core are fixed, then the
 D8CacheAttachmentsCollector will mostly be useful for views and panels to give
 them the ability to collect assets as well.
 
-Note: As the early page cache is served before all modules are loaded, you must
+Note: As the page cache is served before all modules are loaded, you must
 not use D8CacheAttachmentsCollector for the 'cache_page' bin!
 
 Frequently asked questions
@@ -255,7 +255,7 @@ Varnish as stated already above).
 
 Please open an issue here:
 
-  http://drupal.org/project/issues/d8cache
+  https://www.drupal.org/project/issues/d8cache
 
 - Is there more material to learn about cache tags and cache max-age?
 
