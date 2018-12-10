@@ -68,6 +68,12 @@ Note: Calling code should check that the returned object from
 _cache_get_object($bin) implements the DrupalTaggableCacheInterface, which is
 the case for all D8Cache cache backends.
 
+Note: Drupal 8 uses max-age values much more consistently than Drupal 7.
+Drupal 7 uses hardcoded expiration timestamps extensively, so conversion must be
+done back and forth.
+Be careful when working with $max_age and $expire, as they are fundamentally
+different!
+
 Which cache tags are invalidated by default?
 --------------------------------------------
 

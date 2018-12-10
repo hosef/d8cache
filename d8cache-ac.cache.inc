@@ -126,7 +126,7 @@ class D8CacheAttachmentsCollector extends D8Cache {
   /**
    * {@inheritdoc}
    */
-  public function set($cid, $data, $expire = Cache::PERMANENT, $tags = array()) {
+  public function set($cid, $data, $expire = CACHE_PERMANENT, $tags = array()) {
     // Fall back to regular D8Cache if we are not in a valid state.
     if (!$this->isValid) {
       parent::set($cid, $data, $expire, $tags);

@@ -123,10 +123,16 @@ class D8Cache implements TaggableDrupalCacheInterface {
   public function set($cid, $data, $expire = CACHE_PERMANENT, $tags = array()) {
     // Allow to override the TTL for a whole bin.
     if (isset($this->configuration['ttl'])) {
-      if ($this->configuration['ttl'] == CACHE_PERMANENT || $this->configuration['ttl'] == CACHE_TEMPORARY) {
+      if ($this->configuration['ttl'] == CACHE_MAX_AGE_PERMANENT) {
+        // Convert the TTL magic value to the equivilent expire magic value.
+        $expire = CACHE_PERMANENT;
+      }
+      elseif ($this->configuration['ttl'] == CACHE_PERMANENT || $this->configuration['ttl'] == CACHE_TEMPORARY) {
+        // Also accept passing the expire magic values directly through.
         $expire = $this->configuration['ttl'];
       }
       else {
+        // Convert the TTL to an expiration timestamp.
         $expire = REQUEST_TIME + $this->configuration['ttl'];
       }
     }
@@ -144,9 +150,7 @@ class D8Cache implements TaggableDrupalCacheInterface {
         $tags = drupal_merge_cache_tags($tags, $page_cache_tags);
       }
 
-      if ($page_cache_max_age != CACHE_MAX_AGE_PERMANENT) {
-        $expire = $this->mergeExpireWithMaxAge($expire, $page_cache_max_age);
-      }
+      $expire = $this->mergeExpireWithMaxAge($expire, $page_cache_max_age);
     }
 
     // Render arrays.
@@ -161,9 +165,7 @@ class D8Cache implements TaggableDrupalCacheInterface {
         $data['#attached']['drupal_add_cache_tags'] = array(array(0 => $cacheable_metadata['tags']));
       }
 
-      if ($cacheable_metadata['max-age'] != CACHE_MAX_AGE_PERMANENT) {
-        $expire = $this->mergeExpireWithMaxAge($expire, $cacheable_metadata['max-age']);
-      }
+      $expire = $this->mergeExpireWithMaxAge($expire, $cacheable_metadata['max-age']);
     }
 
     // No tags, present, just continue normally.
@@ -220,6 +222,10 @@ class D8Cache implements TaggableDrupalCacheInterface {
    *   constants.
    */
   protected function mergeExpireWithMaxAge($expire, $max_age) {
+    // The difference between $expire and $max-age is that while $expire is
+    // a unix timestamp, $max_age is a relative TTL. So, when they interact,
+    // we have to be careful to not compare apples and oranges.
+
     // Do not mess with temporary items.
     if ($expire == CACHE_TEMPORARY) {
       return $expire;

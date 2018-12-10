@@ -111,9 +111,9 @@ if (!function_exists('drupal_emit_cache_tags')) {
 
 if (!defined('CACHE_MAX_AGE_PERMANENT')) {
   /**
-   * Indicates that the item should never be removed unless explicitly deleted.
+   * A max-age value signifying an item that should be cached forever.
    */
-  define('CACHE_MAX_AGE_PERMANENT', -1);
+  define('CACHE_MAX_AGE_PERMANENT', -2);
 }
 
 if (!function_exists('drupal_set_cache_max_age')) {
@@ -159,7 +159,7 @@ if (!function_exists('drupal_get_cache_max_age')) {
 if (!function_exists('drupal_merge_cache_max_ages')) {
 
   /**
-   * Merges max-age values (expressed in seconds), finds the lowest max-age.
+   * Merges max-age values (TTL in seconds), finds the lowest max-age.
    *
    * Ensures infinite max-age (CACHE_MAX_AGE_PERMANENT) is taken into account.
    *
