@@ -52,6 +52,14 @@ version has been finalized.
 D8Cache will automatically detect when this support is available, and if so,
 will defer tag invalidation until after the current transaction has completed.
 
+- Drupal core patch may be needed for accurate render caching
+
+If you are having trouble with missing javascript / CSS when doing render
+caching, try running this the core patch from
+[here](https://www.drupal.org/project/drupal/issues/2820757) (#2820757.)
+
+See that issue for specifics on when this may be necessary.
+
 Frequently asked questions - Users
 ----------------------------------
 For answers to more code-related questions, please see the corresponding FAQ in `README.developer.md`.
