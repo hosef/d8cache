@@ -166,6 +166,10 @@ class D8Cache implements TaggableDrupalCacheInterface {
       }
 
       $expire = $this->mergeExpireWithMaxAge($expire, $cacheable_metadata['max-age']);
+      if ($cacheable_metadata['max-age'] != CACHE_MAX_AGE_PERMANENT) {
+        // Collapse the attached max-age into a single attachment before saving.
+        $data['#attached']['drupal_set_cache_max_age'] = array(array(0 => $cacheable_metadata['max-age']));
+      }
     }
 
     // No tags, present, just continue normally.
