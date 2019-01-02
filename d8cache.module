@@ -186,12 +186,24 @@ function d8cache_do_invalidate_cache_tags($tags) {
  * Callback to invalidate cache tags at the end of a transaction.
  */
 function d8cache_root_transaction_end($committed = NULL) {
-  if ($committed === FALSE) {
-    /* Backwards compatibility with earlier version of core patch. */
-    return;
-  }
   $deferred_tags = &drupal_static('d8cache_deferred_tags', array());
-  d8cache_do_invalidate_cache_tags($deferred_tags);
+  if ($committed === NULL || $committed === TRUE) {
+    // If the commit is presumed successful, proceed with the invalidation.
+    d8cache_do_invalidate_cache_tags($deferred_tags);
+  }
+  else {
+    // Since the transaction was rolled back, the deferred tags no longer
+    // match reality. Since the end result of this transaction was nothing,
+    // we should also do nothing, to eliminate side effects.
+    // Whatever transaction beat us to the commit will have also done its
+    // own invalidation as appropriate, and attempting to invalidate
+    // things ourselves will just cause additional contention for no reason.
+    // Therefore, we do not want to act on the deferred tags at all.
+    //
+    // @todo Check transaction isolation level and invalidate anyway if the
+    // database is operating in a non-isolated mode?
+  }
+  // In both cases, we reset the deferred_tags list.
   $deferred_tags = array();
 }
 
