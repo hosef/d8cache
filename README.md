@@ -186,15 +186,13 @@ sees, not the CDN caching policy.
   // Load DrupalFakeCache to allow enabling caching but not storing locally.
   $conf['cache_backends'][] = 'includes/cache-install.inc';
   }
-  // Use D8Cache for cache_page to handle tag invalidation properly.
-  $conf['cache_class_cache_page'] = 'D8Cache';
+  // Disable the cache_page backing store by using the fake cache backend.
+  // Actual invalidation with the external cache is handled through API calls.
+  $conf['cache_class_cache_page'] = 'DrupalFakeCache';
+
   // Collect attachments for blocks and views data.
   $conf['cache_class_cache_block'] = 'D8CacheAttachmentsCollector';
   $conf['cache_class_cache_views_data'] = 'D8CacheAttachmentsCollector';
-
-  // Disable the cache_page backing store by using the fake cache backend.
-  // Actual invalidation with the external cache is handled through API calls.
-  $conf['d8cache_cache_class_cache_page'] = 'DrupalFakeCache';
   ```
 - Configure your service provider to enforce a large minimum TTL on cache
 objects.
