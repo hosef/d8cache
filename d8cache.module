@@ -180,6 +180,11 @@ function d8cache_do_invalidate_cache_tags($tags) {
     }
   }
   // COMMIT
+  unset($transaction);
+  // Ensure the cache tags cache is invalidated too.
+  foreach ($tags as $tag) {
+    _d8cache_cache_tags_invalidate_cache($tag);
+  }
 }
 
 /**
