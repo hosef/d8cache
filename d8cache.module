@@ -194,7 +194,7 @@ function d8cache_root_transaction_end($committed = NULL) {
   $deferred_tags = &drupal_static('d8cache_deferred_tags', array());
   if ($committed === NULL || $committed === TRUE) {
     // If the commit is presumed successful, proceed with the invalidation.
-    d8cache_do_invalidate_cache_tags($deferred_tags);
+    d8cache_do_invalidate_cache_tags(array_keys($deferred_tags));
   }
   else {
     // Since the transaction was rolled back, the deferred tags no longer
