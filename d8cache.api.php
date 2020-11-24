@@ -12,7 +12,7 @@
  *   The tags to emit to the reverse proxy.
  */
 function hook_emit_cache_tags($tags) {
-  drupal_add_http_header('Surrogate-Key', implode(' ', $tags));
+  backdrop_add_http_header('Surrogate-Key', implode(' ', $tags));
 }
 
 /**

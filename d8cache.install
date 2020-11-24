@@ -31,3 +31,32 @@ function d8cache_schema() {
 
   return $schema;
 }
+
+/**
+ * Implements hook_update_N().
+ */
+function d8cache_update_1000() {
+//  db_select('variable');
+  $config = config('d8cache.settings');
+  $config->set('dcache_cache_class_bin', update_variable_get('dcache_cache_class_bin', 'dynamic variable in file /d8cache/d8cache.cache.inc line 51'));
+  $config->set('d8cache_cache_default_class', update_variable_get('d8cache_cache_default_class', ''));
+  $config->set('d8cache_cache_options', update_variable_get('d8cache_cache_options', 'dynamic value in file /d8cache/d8cache.cache.inc line 62'));
+  $config->set('d8cache_emit_cache_tags', update_variable_get('d8cache_emit_cache_tags', 'FALSE'));
+  $config->set('d8cache_use_cache_tags_cache', update_variable_get('d8cache_use_cache_tags_cache', 'FALSE'));
+  update_variable_del('dcache_cache_class_bin');
+  update_variable_del('d8cache_cache_default_class');
+  update_variable_del('d8cache_cache_options');
+  update_variable_del('d8cache_emit_cache_tags');
+  update_variable_del('d8cache_use_cache_tags_cache');
+
+  $config->save();
+}
+
+/**
+ * Implements hook_install().
+ */
+function d8cache_install() {
+  // Dynamically generated variable data was detected.
+  // /d8cache/d8cache.cache.inc line 51
+  // /d8cache/d8cache.cache.inc line 62
+}

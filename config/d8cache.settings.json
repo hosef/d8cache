@@ -1,0 +1,8 @@
+{
+    "_config_name": "d8cache.settings",
+    "d8cache_cache_default_class": "BackdropDatabaseCache",
+    "d8cache_emit_cache_tags": 0,
+    "d8cache_use_cache_tags_cache": 0,
+    "dcache_cache_class_bin": [],
+    "d8cache_cache_options": []
+}

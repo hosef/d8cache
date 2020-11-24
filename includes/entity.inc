@@ -17,14 +17,14 @@ function d8cache_entity_view($entity, $entity_type, $view_mode, $langcode) {
     $tags = array_merge($tags, _d8cache_entity_get_list_cache_tags($entity_type, $entity));
   }
 
-  $entity->content['#attached']['drupal_add_cache_tags'][][0] = $tags;
+  $entity->content['#attached']['backdrop_add_cache_tags'][][0] = $tags;
 }
 
 /**
  * Implements hook_entity_load().
  */
 function d8cache_entity_load($entities, $entity_type) {
-  $disabled = &drupal_static(__FUNCTION__, FALSE);
+  $disabled = &backdrop_static(__FUNCTION__, FALSE);
 
   if ($disabled) {
     return;
@@ -35,7 +35,7 @@ function d8cache_entity_load($entities, $entity_type) {
     $tags[] = $entity_type . ':' . $entity_id;
   }
 
-  drupal_add_cache_tags($tags);
+  backdrop_add_cache_tags($tags);
 }
 
 /**
@@ -78,7 +78,7 @@ function d8cache_entitycache_load($entities, $entity_type) {
  * Temporarily disable adding of cache tags during entity loading.
  */
 function d8cache_disable_cache_tags_for_entity_load($new_state = NULL) {
-  $state = &drupal_static('d8cache_entity_load', FALSE);
+  $state = &backdrop_static('d8cache_entity_load', FALSE);
   $old_state = $state;
 
   if ($new_state !== NULL) {
@@ -99,7 +99,7 @@ function _d8cache_entity_invalidate_cache_tags($entity_type, $entity) {
   $tags = _d8cache_entity_get_list_cache_tags($entity_type, $entity);
   $tags = array_merge($tags, _d8cache_entity_get_cache_tags($entity_type, $entity));
 
-  drupal_invalidate_cache_tags($tags);
+  backdrop_invalidate_cache_tags($tags);
 }
 
 /**
@@ -108,7 +108,7 @@ function _d8cache_entity_invalidate_cache_tags($entity_type, $entity) {
 function _d8cache_entity_get_list_cache_tags($entity_type, $entity = NULL) {
   $return = array($entity_type . '_list');
   if (!empty($entity)) {
-    list(,, $entity_bundle) = entity_extract_ids($entity_type, $entity);
+    list(, , $entity_bundle) = entity_extract_ids($entity_type, $entity);
     $return[] = $entity_type . '_' . $entity_bundle . '_list';
   }
   return $return;
@@ -118,7 +118,7 @@ function _d8cache_entity_get_list_cache_tags($entity_type, $entity = NULL) {
  * Get cache tags for an entity.
  */
 function _d8cache_entity_get_cache_tags($entity_type, $entity) {
-  list($entity_id,,) = entity_extract_ids($entity_type, $entity);
+  list($entity_id, , ) = entity_extract_ids($entity_type, $entity);
   return array(
     $entity_type . ':' . $entity_id,
   );
